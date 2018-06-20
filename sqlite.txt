@@ -1,0 +1,34 @@
+DROP TABLE IF EXISTS `account`;
+CREATE TABLE `account` (
+  `id` INTEGER PRIMARY KEY AUTOINCREMENT,
+  `blz` CHAR(8) NOT NULL,
+  `user` TEXT NOT NULL,
+  `number` VARCHAR(32) NOT NULL,
+  UNIQUE (`blz`, `number`)
+);
+CREATE TABLE sqlite_sequence(name,seq);
+
+DROP TABLE IF EXISTS `statement`;
+CREATE TABLE `statement` (
+  `id` INTEGER PRIMARY KEY AUTOINCREMENT,
+  `account_id` INTEGER NOT NULL,
+  `day` date NOT NULL,
+  `intradaynum` INTEGER NOT NULL,
+--  `amount` DECIMAL(10,2) NOT NULL,
+  `amount` TEXT NOT NULL,
+  `appl_name` TEXT DEFAULT NULL,
+  `appl_iban` TEXT DEFAULT NULL,
+  `post_text` TEXT DEFAULT NULL,
+  `purpose` TEXT DEFAULT NULL,
+  `adtnl_purpose` TEXT DEFAULT NULL,
+  `adtnl_pos_ref` TEXT DEFAULT NULL,
+  `appl_creditor_id` TEXT DEFAULT NULL,
+  `e2e_ref` TEXT DEFAULT NULL,
+  `prima_nota` TEXT DEFAULT NULL,
+  `return_debit_notes` TEXT DEFAULT NULL,
+  `transaction_code` TEXT DEFAULT NULL,
+  `balance_after` DECIMAL(10,2) DEFAULT NULL,
+  UNIQUE (`account_id`,`day`,`intradaynum`),
+  UNIQUE (`account_id`,`day`,`amount`,`appl_name`,`appl_iban`,`post_text`,`purpose`,`adtnl_purpose`,`adtnl_pos_ref`,`appl_creditor_id`,`e2e_ref`,`prima_nota`,`transaction_code`),
+  FOREIGN KEY (`account_id`) REFERENCES `account` (`id`)
+);

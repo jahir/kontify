@@ -1,0 +1,36 @@
+# example config file for https://github.com/jahir/KoNtify
+# vim: set ts=4 sts=4 sw=4 expandtab autoindent smartindent:
+
+# enable debug output (default: off). overridden by environment variable DEBUG
+#debug: 1
+
+# enable dummy mode, i.e. no db changes (account, statement) and notifications only on stdout (if set). overridden by environment variable DUMMY
+#dummy: 1
+
+# days to retrieve statements for (default: 7). you can also give a number on the command line.
+#days: 7
+
+# URLs for FinTS/HBCI 3.0
+# for German banks, see http://www.hbci-zka.de/institute/institut_auswahl.htm
+access:
+    "10020034":
+        url: "https://example.com/hbci"
+    "80880815":
+        url: "https://example.net/hbciServLet"
+
+# authentication credentials
+# by default, all accounts are fetched. accounts given in 'ignore' are ignore. if 'only' is set, accounts not given there are ignored
+login:
+- { blz: "10020034", user: "your_hbci_user", pin:  "00000" }
+- { blz: "10020034", user: "another_user"  , pin:  "12345", ignore: [ "55543"] }
+- { blz: "80880815", user: "12345678901"   , pin:  "9876" , only: [ "22446688" ] }
+
+# database settings (for now, only sqlite)
+db:
+    path: "kontify.sqlite"
+
+# notification settings
+notify:
+    stdout: "comment this line if you don't want output for new statements"
+#    telegram: { bottoken: "123123123:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", chatid: "12345678" }
+
