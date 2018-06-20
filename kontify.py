@@ -138,7 +138,7 @@ def notify(acc, stmt, balance):
 	full_purpose = re.split(' {2,}', stmt.strval('purpose')+(add_purpose if add_purpose is not None else '') )
 	if 'stdout' in c:
 		print('%s BLZ %s Konto %s: %s "%s"' % (stmt.strval('date'), acc.blz, acc.accountnumber, stmt.strval('amount'), stmt.strval('applicant_name')))
-		print('%s%s', (stmt.strval('posting_text')+': ' if 'posting_text' in stmt.data else '', ' '.join(full_purpose)))
+		print('%s%s' % (stmt.strval('posting_text')+': ' if 'posting_text' in stmt.data else '', ' '.join(full_purpose)))
 		print('Neuer Kontostand:', balance)
 		print()
 	if DUMMY:
@@ -157,10 +157,10 @@ def notify(acc, stmt, balance):
 def sendtelegrammessage(msg):
 	try:
 		c = config['notify']['telegram']
-		data = { 'chat_id': c['chatid'], 'disable_web_page_preview': True, 'parse_mode': 'Markdown', 'text': msg.encode('iso-8859-1') }
-		postdata = urllib.parse.urlencode(data).encode('utf-8')
-		reply = urllib.request.urlopen('https://api.telegram.org/bot%s/sendMessage' % (c['bottoken'],), postdata).read().decode('utf-8')
-		res = json.loads(reply)
+		url = 'https://api.telegram.org/bot%s/sendMessage' % (c['bottoken'],)
+		data = urllib.parse.urlencode({ 'chat_id': c['chatid'], 'text': msg, 'parse_mode': 'Markdown', 'disable_web_page_preview': True }).encode('ascii')
+		response = urllib.request.urlopen(url, data).read()
+		res = json.loads(response)
 		return res['ok']
 	except Exception as e:
 		print('sending telegram message failed:', e)
