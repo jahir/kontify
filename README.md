@@ -16,7 +16,7 @@ Currently supported/required:
 - create the database with `sqlite3 kontify.sqlite < sqlite.txt`
 - run `DEBUG=1 DUMMY=1 ./kontify.py 1` to see if it works
 - run `./kontify.py 100` to fetch some data (most banks will only let you retrieve one or three months)
-- add add cronjob (with `crontab -e`), e.g. `13 * * * * ~/kontify/kontify.py`
+- add add cronjob (with `crontab -e`), e.g. `13 * * * * cd ~/kontify && ./kontify.py`
 - by default, new statements are just printed out, so your cron daemon will send you an email
 - if you want Telegram notifications, you need 
    - a bot token, see https://core.telegram.org/bots#6-botfather. Note that the _Username_ of you bot has to be globally unique, so use something specific like JakobsKontifyBot
