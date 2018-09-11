@@ -32,8 +32,10 @@ from sqlite3 import IntegrityError
 
 from fints.client import FinTS3PinTanClient
 from fints.dialog import FinTSDialogError
+from fints.connection import FinTSConnectionError
 import mt940
 
+from requests.exceptions import RequestException
 import urllib.parse
 import urllib.request
 import json
@@ -176,7 +178,7 @@ for l in config['login']:
 	try:
 		f = FinTS3PinTanClient(blz, user, pin, url)
 		accounts = f.get_sepa_accounts()
-	except FinTSDialogError as e:
+	except (FinTSDialogError, FinTSConnectionError, RequestException) as e:
 		print("! fints client exception for blz %s user %s: %s" % (blz, user, e))
 		continue
 	accountlist = get_accounts(blz, user)
@@ -195,7 +197,7 @@ for l in config['login']:
 		if days >= 0:
 			try:
 				statement = f.get_statement(a, date.today() - timedelta(days), date.today())
-			except FinTSDialogError as e:
+			except (FinTSDialogError, FinTSConnectionError, RequestException) as e:
 				print("! fints get_statement exception for blz %s user %s account %s: %s" % (blz, user, a.accountnumber, e))
 				continue
 			if not statement:
