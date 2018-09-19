@@ -172,8 +172,16 @@ def sendtelegrammessage(msg):
 # main ##########################################
 
 for l in config['login']:
-	blz, user, pin = (l[k] for k in ('blz', 'user', 'pin'))
-	bankname, url = (config['access'][blz][k] for k in ('name', 'url'))
+	try:
+		blz, user, pin = (l[k] for k in ('blz', 'user', 'pin'))
+	except KeyError as e:
+		print('! missing login config key %s in %s' % (e, str(l)))
+		continue
+	try:
+		bankname, url = (config['access'][blz][k] for k in ('name', 'url'))
+	except KeyError:
+		print('! missing access config for BLZ %s' % (blz,))
+		continue
 	dprint("* %s (blz %s) user %s" % (bankname, blz, user))
 	try:
 		f = FinTS3PinTanClient(blz, user, pin, url)
