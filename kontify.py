@@ -133,23 +133,23 @@ def add_statement(accid, indaynum, balance, stmt):
 		return -1
 
 # notify ########################################
-def notify(acc, stmt, balance):
+def notify(bankname, acc, stmt, balance):
 	if 'notify' not in config:
 		return
 	c = config['notify']
 	add_purpose = stmt.sqlval('additional_purpose')
 	full_purpose = re.split(' {2,}', stmt.strval('purpose')+(add_purpose if add_purpose is not None else '') )
 	if 'stdout' in c:
-		print('%s BLZ %s Konto %s: %s "%s"' % (stmt.strval('date'), acc.blz, acc.accountnumber, stmt.strval('amount'), stmt.strval('applicant_name')))
+		print('%s %s (BLZ %s) Konto %s: %s "%s"' % (stmt.strval('date'), bankname, acc.blz, acc.accountnumber, stmt.strval('amount'), stmt.strval('applicant_name')))
 		print('%s%s' % (stmt.strval('posting_text')+': ' if 'posting_text' in stmt.data else '', ' '.join(full_purpose)))
 		print('Neuer Kontostand:', balance)
 		print()
 	if DUMMY:
 		return # skip "real" notifications
 	if 'telegram' in c:
-		msg  = '%s\nBLZ *%s* Konto *%s*: *%s*\n_%s_\n%s_%s_\nNeuer Kontostand: *%s*' % (
+		msg  = '%s *%s* (BLZ %s)\nKonto *%s*: *%s*\n_%s_\n%s_%s_\nNeuer Kontostand: *%s*' % (
 			stmt.strval('date'),
-			acc.blz, acc.accountnumber, stmt.strval('amount'),
+			bankname, acc.blz, acc.accountnumber, stmt.strval('amount'),
 			stmt.strval('applicant_name'),
 			stmt.strval('posting_text')+':\n' if 'posting_text' in stmt.data else '',
 			'\n'.join(full_purpose),
@@ -173,13 +173,13 @@ def sendtelegrammessage(msg):
 
 for l in config['login']:
 	blz, user, pin = (l[k] for k in ('blz', 'user', 'pin'))
-	url = config['access'][blz]['url']
-	dprint("* blz %s user %s" % (blz, user))
+	bankname, url = (config['access'][blz][k] for k in ('name', 'url'))
+	dprint("* %s (blz %s) user %s" % (bankname, blz, user))
 	try:
 		f = FinTS3PinTanClient(blz, user, pin, url)
 		accounts = f.get_sepa_accounts()
 	except (FinTSDialogError, FinTSConnectionError, RequestException) as e:
-		print("! fints client exception for blz %s user %s: %s" % (blz, user, e))
+		print("! fints client exception for %s (blz %s) user %s: %s" % (bankname, blz, user, e))
 		continue
 	accountlist = get_accounts(blz, user)
 	for a in accounts:
@@ -198,7 +198,7 @@ for l in config['login']:
 			try:
 				statement = f.get_statement(a, date.today() - timedelta(days), date.today())
 			except (FinTSDialogError, FinTSConnectionError, RequestException) as e:
-				print("! fints get_statement exception for blz %s user %s account %s: %s" % (blz, user, a.accountnumber, e))
+				print("! fints get_statement exception for %s (blz %s) user %s account %s: %s" % (bankname, blz, user, a.accountnumber, e))
 				continue
 			if not statement:
 				continue
@@ -224,7 +224,7 @@ for l in config['login']:
 					day0 = day
 				if add_statement(accid, indaynum, balance, s) > 0:
 					cnt_added += 1
-					notify(a, s, balance)
+					notify(bankname, a, s, balance)
 				else:
 					dprint('   - transaction already in database')
 					cnt_dupl += 1
