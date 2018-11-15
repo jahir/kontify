@@ -10,8 +10,8 @@
 # days to retrieve statements for (default: 7). you can also give a number on the command line.
 #days: 7
 
-# URLs for FinTS/HBCI 3.0
-# for German banks, see http://www.hbci-zka.de/institute/institut_auswahl.htm
+# URLs for FinTS/HBCI 3.0. AFAIK, there is no public service to get this (hbci-zka.de shut their's down),
+# but you can use https://github.com/dr-duplo/python-fints-url
 access:
     "10020034":
         url: "https://example.com/hbci"
