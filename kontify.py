@@ -114,7 +114,7 @@ def add_account(blz, user, accnum):
 
 def add_statement(accid, indaynum, balance, stmt):
 	if DUMMY:
-		return 0
+		return 1
 	c = db.cursor()
 	q_cols = ('account_id', 'day', 'amount', 'appl_name', 'appl_iban', 'post_text', 'purpose', 'adtnl_purpose', 'adtnl_pos_ref', 'appl_creditor_id', 'e2e_ref', 'prima_nota', 'return_debit_notes', 'transaction_code', 'intradaynum', 'balance_after')
 	q = 'INSERT INTO `statement` (%s) VALUES (%s)' % (
@@ -137,11 +137,11 @@ def notify(bankname, acc, stmt, balance):
 	if 'notify' not in config:
 		return
 	c = config['notify']
-	add_purpose = stmt.sqlval('additional_purpose')
-	full_purpose = re.split(' {2,}', stmt.strval('purpose')+(add_purpose if add_purpose is not None else '') )
+	posting_text = stmt.strval('posting_text')
+	full_purpose = re.split(' {2,}', stmt.strval('purpose') + ' ' + stmt.strval('add_purpose'))
 	if 'stdout' in c:
 		print('%s %s (BLZ %s) Konto %s: %s "%s"' % (stmt.strval('date'), bankname, acc.blz, acc.accountnumber, stmt.strval('amount'), stmt.strval('applicant_name')))
-		print('%s%s' % (stmt.strval('posting_text')+': ' if 'posting_text' in stmt.data else '', ' '.join(full_purpose)))
+		print('%s%s' % (posting_text+': ' if posting_text else '', ' '.join(full_purpose)))
 		print('Neuer Kontostand:', balance)
 		print()
 	if DUMMY:
@@ -151,7 +151,7 @@ def notify(bankname, acc, stmt, balance):
 			stmt.strval('date'),
 			bankname, acc.blz, acc.accountnumber, stmt.strval('amount'),
 			stmt.strval('applicant_name'),
-			stmt.strval('posting_text')+':\n' if 'posting_text' in stmt.data else '',
+			posting_text+':\n' if posting_text else '',
 			'\n'.join(full_purpose),
 			balance
 		)
