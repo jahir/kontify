@@ -11,7 +11,7 @@ Currently supported/required:
 ## Installation
 
 - clone repo or download archive and unpack
-- install python-FinTS _fints_ module (e.g. with `pip3 install`), requires _mt940_. install _yaml_ and _urllib3_ modules.
+- install [_fints_](https://github.com/raphaelm/python-fints) module (e.g. with `pip3 install`), requires _mt940_. install _yaml_ and _urllib3_ modules.
 - copy kontify.yaml.example to kontify.yaml and put in your banking data and access settings
 - create the database with `sqlite3 kontify.sqlite < sqlite.txt`
 - run `DEBUG=1 DUMMY=1 ./kontify.py 1` to see if it works
