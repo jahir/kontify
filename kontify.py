@@ -30,9 +30,8 @@ from decimal import Decimal
 import sqlite3
 from sqlite3 import IntegrityError
 
-from fints.client import FinTS3PinTanClient
-from fints.dialog import FinTSDialogError
-from fints.connection import FinTSConnectionError
+from fints.client import FinTS3PinTanClient, logger
+from fints.exceptions import FinTSError
 import mt940
 
 from requests.exceptions import RequestException
@@ -55,6 +54,8 @@ DUMMY = ('DUMMY' in os.environ and os.environ['DUMMY']) or 'dummy' in config and
 def dprint(*args):
 	if DEBUG:
 		print(*args)
+
+logger.addFilter(lambda record: 0 if re.match('Dialog response: 30[16]0 ', record.msg % record.args) else 1)
 
 # mt940/fints extensions ########################
 # format statement data value
@@ -186,7 +187,7 @@ for l in config['login']:
 	try:
 		f = FinTS3PinTanClient(blz, user, pin, url)
 		accounts = f.get_sepa_accounts()
-	except (FinTSDialogError, FinTSConnectionError, RequestException) as e:
+	except (FinTSError, RequestException, ValueError) as e:
 		print("! fints client exception for %s (blz %s) user %s: %s" % (bankname, blz, user, e))
 		continue
 	accountlist = get_accounts(blz, user)
@@ -204,9 +205,9 @@ for l in config['login']:
 		dprint("** [%s] account %s (IBAN %s BIC %s)" % (accid, a.accountnumber, a.iban, a.bic))
 		if days >= 0:
 			try:
-				statement = f.get_statement(a, date.today() - timedelta(days), date.today())
-			except (FinTSDialogError, FinTSConnectionError, RequestException) as e:
-				print("! fints get_statement exception for %s (blz %s) user %s account %s: %s" % (bankname, blz, user, a.accountnumber, e))
+				statement = f.get_transactions(a, date.today() - timedelta(days), date.today())
+			except (FinTSError, RequestException) as e:
+				print("! fints get_transactions exception for %s (blz %s) user %s account %s: %s" % (bankname, blz, user, a.accountnumber, e))
 				continue
 			if not statement:
 				continue
