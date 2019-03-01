@@ -57,6 +57,9 @@ def dprint(*args):
 
 logger.addFilter(lambda record: 0 if re.match('Dialog response: 30[16]0 ', record.msg % record.args) else 1)
 
+def str_suffix_unless_empty(s, suffix):
+	return s + suffix if s else ''
+
 # mt940/fints extensions ########################
 # format statement data value
 def transaction_formatval(self, k, noneval, amntcur):
@@ -138,24 +141,23 @@ def notify(bankname, acc, stmt, balance):
 	if 'notify' not in config:
 		return
 	c = config['notify']
-	posting_text = stmt.strval('posting_text')
 	full_purpose = re.split(' {2,}', stmt.strval('purpose') + ' ' + stmt.strval('add_purpose'))
 	if 'stdout' in c:
 		print('%s %s (BLZ %s) Konto %s: %s "%s"' % (stmt.strval('date'), bankname, acc.blz, acc.accountnumber, stmt.strval('amount'), stmt.strval('applicant_name')))
-		print('%s%s' % (posting_text+': ' if posting_text else '', ' '.join(full_purpose)))
+		print('%s%s' % (str_suffix_unless_empty(stmt.strval('posting_text'), ': '), ' '.join(full_purpose)))
 		print('Neuer Kontostand:', balance)
 		print()
 	if DUMMY:
 		return # skip "real" notifications
 	if 'telegram' in c:
-		msg  = '%s *%s* (BLZ %s)\nKonto *%s*: *%s*\n_%s_\n%s_%s_\nNeuer Kontostand: *%s*' % (
-			stmt.strval('date'),
-			bankname, acc.blz, acc.accountnumber, stmt.strval('amount'),
-			stmt.strval('applicant_name'),
-			posting_text+':\n' if posting_text else '',
-			'\n'.join(full_purpose),
-			balance
-		)
+		msg = '%(date)s *%(bankname)s* (BLZ %(blz)s)\nKonto *%(accno)s*: *%(amount)s*\n_%(applname)s_%(posttext)s_%(purp)s_\nNeuer Kontostand: *%(balance)s*' % {
+			'date': stmt.strval('date'), 'bankname': bankname, 'blz': acc.blz,
+			'accno': acc.accountnumber, 'amount': stmt.strval('amount'),
+			'applname': str_suffix_unless_empty(stmt.strval('applicant_name'), '\n'),
+			'posttext': str_suffix_unless_empty(stmt.strval('posting_text'), ':\n'),
+			'purp': '\n'.join(full_purpose),
+			'balance': balance
+		}
 		sendtelegrammessage(msg)
 
 def sendtelegrammessage(msg):
