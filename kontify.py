@@ -55,7 +55,8 @@ def dprint(*args):
 	if DEBUG:
 		print(*args)
 
-logger.addFilter(lambda record: 0 if re.match('Dialog response: 30[16]0 ', record.msg % record.args) else 1)
+if 'ignore_responses' in config:
+	logger.addFilter(lambda record: 0 if getattr(record, 'fints_response_code', None) in config['ignore_responses'] else 1)
 
 def str_suffix_unless_empty(s, suffix):
 	return s + suffix if s else ''

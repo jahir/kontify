@@ -10,6 +10,12 @@
 # days to retrieve statements for (default: 7). you can also give a number on the command line.
 #days: 7
 
+# Dialog response codes to ignore (gratuitous noise)
+# # 3060 - warnings/notes present
+# # 3010 - no transactions found
+# # 3920 - list allowed allowed TAN methods: [...]
+ignore_responses: ["3060", "3010", "3920"]
+
 # URLs for FinTS/HBCI 3.0. AFAIK, there is no public service to get this (hbci-zka.de shut their's down),
 # but you can use https://github.com/dr-duplo/python-fints-url
 access:
