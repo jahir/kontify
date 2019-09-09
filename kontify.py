@@ -48,6 +48,8 @@ elif 'days' in config:
 else:
 	days = 7
 
+PRODUCT_ID = '3B3D0A8A8D3F9FA9FEECBF81B'
+
 # helper ########################################
 DEBUG = ('DEBUG' in os.environ and os.environ['DEBUG']) or 'debug' in config and config['debug']
 DUMMY = ('DUMMY' in os.environ and os.environ['DUMMY']) or 'dummy' in config and config['dummy']
@@ -188,7 +190,7 @@ for l in config['login']:
 		continue
 	dprint("* %s (blz %s) user %s" % (bankname, blz, user))
 	try:
-		f = FinTS3PinTanClient(blz, user, pin, url)
+		f = FinTS3PinTanClient(blz, user, pin, url, product_id=PRODUCT_ID)
 		accounts = f.get_sepa_accounts()
 	except (FinTSError, RequestException, ValueError) as e:
 		print("! fints client exception for %s (blz %s) user %s: %s" % (bankname, blz, user, e))
