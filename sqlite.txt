@@ -6,7 +6,6 @@ CREATE TABLE `account` (
   `number` VARCHAR(32) NOT NULL,
   UNIQUE (`blz`, `number`)
 );
-CREATE TABLE sqlite_sequence(name,seq);
 
 DROP TABLE IF EXISTS `statement`;
 CREATE TABLE `statement` (

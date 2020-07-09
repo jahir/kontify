@@ -21,8 +21,10 @@ ignore_responses: ["3060", "3010", "3920"]
 access:
     "10020034":
         url: "https://example.com/hbci"
+        name: "Example.com Bank"
     "80880815":
         url: "https://example.net/hbciServLet"
+        name: "Example.net Bank"
 
 # authentication credentials
 # by default, all accounts are fetched. accounts given in 'ignore' are ignore. if 'only' is set, accounts not given there are ignored
